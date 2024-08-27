@@ -15,23 +15,29 @@ export const CustomJoystick = ({ onMove }: CustomJoystickProps) => {
       onPanResponderMove: (event, gestureState) => {
         let newX = gestureState.dx;
         let newY = gestureState.dy;
+        const limit = 75; // (150px / 2)
 
-        if (newX > 100) {
-          newX = 100;
+        // Limiter les mouvements à 75px
+        if (newX > limit) {
+          newX = limit;
         }
-        if (newX < -100) {
-          newX = -100;
+        if (newX < -limit) {
+          newX = -limit;
         }
-        if (newY > 100) {
-          newY = 100;
+        if (newY > limit) {
+          newY = limit;
         }
-        if (newY < -100) {
-          newY = -100;
+        if (newY < -limit) {
+          newY = -limit;
         }
+
+        // Transformer les 75px en 100px
+        const transformXto100 = (newX / limit) * 100; // transformer en -100 à 100
+        const transformYto100 = (newY / limit) * 100; // transformer en -100 à 100
 
         pan.setValue({ x: newX, y: newY });
         setPosition({ x: newX, y: newY });
-        onMove && onMove(newX, newY * -1);
+        onMove && onMove(transformXto100, transformYto100 * -1);
       },
       onPanResponderRelease: () => {
         Animated.spring(pan, {
@@ -57,9 +63,9 @@ export const CustomJoystick = ({ onMove }: CustomJoystickProps) => {
 
 const styles = StyleSheet.create({
   joystickContainer: {
-    width: 200,
-    height: 200,
-    backgroundColor: '#ddd',
+    width: 150,
+    height: 150,
+    backgroundColor: '#173b5e8a',
     borderRadius: 100,
     justifyContent: 'center',
     alignItems: 'center',
@@ -67,7 +73,7 @@ const styles = StyleSheet.create({
   joystick: {
     width: 50,
     height: 50,
-    backgroundColor: '#888',
+    backgroundColor: '#fff',
     borderRadius: 25,
   },
 });

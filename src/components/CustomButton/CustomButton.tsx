@@ -32,7 +32,7 @@ export const CustomButton: React.FC<CustomButtonProps> = ({
 
   return (
     <TouchableOpacity onPress={handlePress} style={styles.touchableStyle}>
-      <Image source={iconUrl} style={styles.iconStyle} resizeMode="contain" />
+      <Image source={{ uri: iconUrl.toString() }} style={styles.iconStyle} resizeMode="contain" />
     </TouchableOpacity>
   );
 };

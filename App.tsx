@@ -7,7 +7,7 @@ function App(): React.JSX.Element {
   const [video, setVideo] = useState(true);
 
   const handleMove = (x: number, y: number) => {
-    console.log(`X: ${Math.round(x)}, Y: ${Math.round(y)}`);
+    console.log(calculateWheelDirections(x, y););
   };
 
   const toggleVideo = () => {

@@ -1,13 +1,10 @@
-import AsyncStorage from '@react-native-async-storage/async-storage';
-
 export class WebSocketManager {
   private static instance: WebSocketManager;
   public socket!: WebSocket;
   private isConnected: boolean = false;
-  private ipAddress: string | null = null;
 
   private constructor() {
-    this.loadIpAddressAndConnect();
+    this.connect();
   }
 
   public static getInstance(): WebSocketManager {
@@ -17,27 +14,8 @@ export class WebSocketManager {
     return WebSocketManager.instance;
   }
 
-  private async loadIpAddressAndConnect() {
-    try {
-      const storedIpAddress = await AsyncStorage.getItem('carIpAddress');
-      if (storedIpAddress) {
-        this.ipAddress = storedIpAddress;
-        this.connect(this.ipAddress);
-      } else {
-        console.error('No IP address found in storage.');
-      }
-    } catch (error) {
-      console.error('Failed to load IP address:', error);
-    }
-  }
-
-  private connect(ipAddress: string) {
-    if (!ipAddress) {
-      console.error('IP address is required to connect.');
-      return;
-    }
-
-    this.socket = new WebSocket(`ws://${ipAddress}/carwebsocket`);
+  private connect() {
+    this.socket = new WebSocket(`ws://192.168.70.50/carwebsocket`);
 
     this.socket.onopen = () => {
       console.log('WebSocket connection established');
@@ -57,18 +35,6 @@ export class WebSocketManager {
     this.socket.onmessage = message => {
       console.log('WebSocket message received:', message.data);
     };
-  }
-
-  public updateIpAddress(ipAddress: string) {
-    this.ipAddress = ipAddress;
-    AsyncStorage.setItem('carIpAddress', ipAddress)
-      .then(() => {
-        console.log('IP address updated and saved.');
-        this.connect(ipAddress);
-      })
-      .catch(error => {
-        console.error('Failed to save IP address:', error);
-      });
   }
 
   public sendMessage(message: object) {

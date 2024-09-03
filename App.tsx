@@ -1,37 +1,14 @@
-import React, { useState, useEffect } from 'react';
-import { SafeAreaView, StyleSheet, View, TextInput, Button, Alert } from 'react-native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import React, { useState } from 'react';
+import { SafeAreaView, StyleSheet, View } from 'react-native';
+import { WebView } from 'react-native-webview';
 import { CustomButton, CustomJoystick, HugeButton } from './src/components';
+import { WebSocketManager } from './src/services/websocketManager';
 import { icons } from './src/theme';
 import { calculateWheelDirections } from './src/utils/calculateWheelDirections';
-import { WebSocketManager } from './src/services/websocketManager';
-import { NetworkInfo } from 'react-native-network-info';
 
 function App(): React.JSX.Element {
   const [video, setVideo] = useState(true);
-  const [ipAddress, setIpAddress] = useState('');
-  const [mobileIpAddress, setMobileIpAddress] = useState('');
-
-  useEffect(() => {
-    // Load IP address from storage on app start
-    const loadIpAddress = async () => {
-      try {
-        const storedIpAddress = await AsyncStorage.getItem('carIpAddress');
-        if (storedIpAddress) {
-          setIpAddress(storedIpAddress);
-          WebSocketManager.getInstance().updateIpAddress(storedIpAddress); // Update WebSocket connection with stored IP
-        }
-      } catch (error) {
-        console.error('Failed to load IP address:', error);
-      }
-
-      NetworkInfo.getIPAddress().then(myIp => {
-        setMobileIpAddress(myIp?.toString() || '');
-      });
-    };
-
-    loadIpAddress();
-  }, []);
+  const [canHorn, setCanHorn] = useState(true);
 
   const handleMove = (x: number, y: number) => {
     const wsManager = WebSocketManager.getInstance();
@@ -54,32 +31,35 @@ function App(): React.JSX.Element {
     setVideo(!video);
   };
 
-  const saveIpAddress = async () => {
-    try {
-      await AsyncStorage.setItem('carIpAddress', ipAddress);
-      WebSocketManager.getInstance().updateIpAddress(ipAddress); // Update WebSocket connection with new IP
-      Alert.alert('Success', 'IP address saved!');
-    } catch (error) {
-      console.error('Failed to save IP address:', error);
-    }
+  const toggleHorn = () => {
+    setCanHorn(!canHorn);
   };
 
   return (
     <SafeAreaView style={styles.mainContainer}>
-      <View style={styles.ipInputContainer}>
-        <TextInput
-          style={styles.ipInput}
-          placeholder={'Your current ip is: ' + mobileIpAddress}
-          value={ipAddress}
-          onChangeText={setIpAddress}
-        />
-        <Button title="Save" onPress={saveIpAddress} />
-      </View>
+      <WebView
+        source={{ uri: `http://192.168.70.50:7000` }}
+        style={styles.videoStream}
+      />
       <View style={styles.alignJoystick}>
         <CustomJoystick onMove={handleMove} />
       </View>
       <View style={styles.alignHorn}>
-        <CustomButton iconUrl={icons.horn} cmd={8} data={[1, 5000]} />
+        {canHorn ? (
+          <CustomButton
+            iconUrl={icons.horn}
+            cmd={7}
+            data={1}
+            onPress={toggleHorn}
+          />
+        ) : (
+          <CustomButton
+            iconUrl={icons.horn}
+            cmd={7}
+            data={0}
+            onPress={toggleHorn}
+          />
+        )}
       </View>
       <View style={styles.alignVideo}>
         <CustomButton
@@ -102,6 +82,14 @@ const styles = StyleSheet.create({
     height: '100%',
     backgroundColor: '#081624',
     position: 'relative',
+  },
+  videoStream: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    zIndex: -1,
   },
   ipInputContainer: {
     position: 'absolute',

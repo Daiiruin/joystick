@@ -1,20 +1,81 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Image, StyleSheet, TouchableOpacity, View } from 'react-native';
+import { WebSocketManager } from '../../services/websocketManager';
 import { icons } from '../../theme';
 
 export const HugeButton = () => {
+  // États pour stocker les angles verticaux et horizontaux
+  const [angleVertical, setAngleVertical] = useState(90);
+  const [angleHorizontal, setAngleHorizontal] = useState(90);
+
+  // Fonction pour envoyer des données via WebSocket
+  const sendWebSocketMessage = (cmd, data) => {
+    const message = { cmd, data };
+    const wsManager = WebSocketManager.getInstance();
+
+    if (wsManager.socket.readyState === WebSocket.OPEN) {
+      wsManager.sendMessage(message);
+    } else {
+      console.error(
+        'Cannot send message, WebSocket not open. Ready state is:',
+        wsManager.socket.readyState,
+      );
+    }
+  };
+
+  // Gestionnaires de clic pour chaque direction
+  const handleRightPress = () => {
+    if (angleVertical > 0) {
+      const newAngle = Math.max(angleVertical - 20, 0);
+      setAngleVertical(newAngle);
+      sendWebSocketMessage(3, [newAngle, angleHorizontal]);
+    }
+  };
+
+  const handleLeftPress = () => {
+    if (angleVertical < 180) {
+      const newAngle = Math.min(angleVertical + 20, 180);
+      setAngleVertical(newAngle);
+      sendWebSocketMessage(3, [newAngle, angleHorizontal]);
+    }
+  };
+
+  const handleUpPress = () => {
+    if (angleHorizontal < 180) {
+      const newAngle = Math.min(angleHorizontal + 20, 180);
+      setAngleHorizontal(newAngle);
+      sendWebSocketMessage(3, [angleVertical, newAngle]);
+    }
+  };
+
+  const handleDownPress = () => {
+    if (angleHorizontal > 0) {
+      const newAngle = Math.max(angleHorizontal - 20, 0);
+      setAngleHorizontal(newAngle);
+      sendWebSocketMessage(3, [angleVertical, newAngle]);
+    }
+  };
+
   return (
     <View style={styles.viewStyled}>
-      <TouchableOpacity style={[styles.buttonStyle, styles.alignTop]}>
+      <TouchableOpacity
+        style={[styles.buttonStyle, styles.alignTop]}
+        onPress={handleUpPress}>
         <Image source={icons.arrowUp} style={styles.iconStyleH} />
       </TouchableOpacity>
-      <TouchableOpacity style={[styles.buttonStyle, styles.alignRight]}>
+      <TouchableOpacity
+        style={[styles.buttonStyle, styles.alignRight]}
+        onPress={handleRightPress}>
         <Image source={icons.arrowRight} style={styles.iconStyleV} />
       </TouchableOpacity>
-      <TouchableOpacity style={[styles.buttonStyle, styles.alignBottom]}>
+      <TouchableOpacity
+        style={[styles.buttonStyle, styles.alignBottom]}
+        onPress={handleDownPress}>
         <Image source={icons.arrowDown} style={styles.iconStyleH} />
       </TouchableOpacity>
-      <TouchableOpacity style={[styles.buttonStyle, styles.alignLeft]}>
+      <TouchableOpacity
+        style={[styles.buttonStyle, styles.alignLeft]}
+        onPress={handleLeftPress}>
         <Image source={icons.arrowLeft} style={styles.iconStyleV} />
       </TouchableOpacity>
     </View>

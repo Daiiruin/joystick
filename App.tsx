@@ -9,6 +9,8 @@ import { calculateWheelDirections } from './src/utils/calculateWheelDirections';
 function App(): React.JSX.Element {
   const [video, setVideo] = useState(true);
   const [canHorn, setCanHorn] = useState(true);
+  const [startRace, setStartRace] = useState(false);
+  const [startAutoRace, setStartAutoRace] = useState(false);
 
   const handleMove = (x: number, y: number) => {
     const wsManager = WebSocketManager.getInstance();
@@ -27,6 +29,12 @@ function App(): React.JSX.Element {
     console.log(calculateWheelDirections(x, y));
   };
 
+  const getRandomInteger = (min: number, max: number) => {
+    const randomInteger = Math.floor(Math.random() * (max - min + 1)) + min;
+    console.info('Random integer:', randomInteger);
+    return randomInteger;
+  };
+
   const toggleVideo = () => {
     setVideo(!video);
   };
@@ -35,14 +43,56 @@ function App(): React.JSX.Element {
     setCanHorn(!canHorn);
   };
 
+  const toggleStartRace = () => {
+    setStartRace(!startRace);
+  };
+
+  const toggleStartAutoRace = () => {
+    setStartAutoRace(!startAutoRace);
+  };
+
   return (
     <SafeAreaView style={styles.mainContainer}>
       <WebView
         source={{ uri: `http://192.168.70.50:7000` }}
         style={styles.videoStream}
       />
+      <View style={styles.alignStartAutoRace}>
+        {startAutoRace ? (
+          <CustomButton
+            title={'Stop Auto'}
+            cmd={11}
+            data={0}
+            onPress={toggleStartAutoRace}
+          />
+        ) : (
+          <CustomButton
+            title={'Start Auto'}
+            cmd={11}
+            data={1}
+            onPress={toggleStartAutoRace}
+          />
+        )}
+      </View>
       <View style={styles.alignJoystick}>
         <CustomJoystick onMove={handleMove} />
+      </View>
+      <View style={styles.alignStartRace}>
+        {startRace ? (
+          <CustomButton
+            title={'Stop race'}
+            cmd={10}
+            data={0}
+            onPress={toggleStartRace}
+          />
+        ) : (
+          <CustomButton
+            title={'Start race'}
+            cmd={10}
+            data={getRandomInteger(1, 10000)}
+            onPress={toggleStartRace}
+          />
+        )}
       </View>
       <View style={styles.alignHorn}>
         {canHorn ? (
@@ -64,7 +114,7 @@ function App(): React.JSX.Element {
       <View style={styles.alignVideo}>
         <CustomButton
           onPress={toggleVideo}
-          iconUrl={video === true ? icons.videoOn : icons.videoOff}
+          iconUrl={video === true ? icons.videoOff : icons.videoOn}
           cmd={9}
           data={video === true ? 1 : 0}
         />
@@ -128,6 +178,16 @@ const styles = StyleSheet.create({
     position: 'absolute',
     bottom: 85,
     right: 110,
+  },
+  alignStartRace: {
+    position: 'absolute',
+    top: 10,
+    right: 10,
+  },
+  alignStartAutoRace: {
+    position: 'absolute',
+    top: 10,
+    left: 10,
   },
 });
 

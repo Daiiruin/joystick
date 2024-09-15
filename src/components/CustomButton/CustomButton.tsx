@@ -1,12 +1,13 @@
-import React from 'react';
-import { Image, StyleSheet, TouchableOpacity } from 'react-native';
+import React, { FC } from 'react';
+import { Image, StyleSheet, Text, TouchableOpacity } from 'react-native';
 import { WebSocketManager } from '../../services/websocketManager';
 import { CustomButtonProps } from './customButtonProps';
 
-export const CustomButton: React.FC<CustomButtonProps> = ({
+export const CustomButton: FC<CustomButtonProps> = ({
   iconUrl,
   cmd,
   data,
+  title,
   onPress,
 }) => {
   const handlePress = () => {
@@ -32,16 +33,20 @@ export const CustomButton: React.FC<CustomButtonProps> = ({
 
   return (
     <TouchableOpacity onPress={handlePress} style={styles.touchableStyle}>
-      <Image
-        source={{ uri: iconUrl.toString() }}
-        style={styles.iconStyle}
-        resizeMode="contain"
-      />
+      {iconUrl && (
+        <Image source={iconUrl} style={styles.iconStyle} resizeMode="contain" />
+      )}
+      {title && <Text style={styles.textStyles}>{title}</Text>}
     </TouchableOpacity>
   );
 };
 
 const styles = StyleSheet.create({
+  textStyles: {
+    color: '#fff',
+    fontSize: 14,
+    textTransform: 'uppercase',
+  },
   touchableStyle: {
     alignItems: 'center',
     justifyContent: 'center',

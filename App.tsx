@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { SafeAreaView, StyleSheet, View } from 'react-native';
+import { SafeAreaView, StyleSheet, View, Text } from 'react-native';
 import { WebView } from 'react-native-webview';
 import { CustomButton, CustomJoystick, HugeButton } from './src/components';
 import { WebSocketManager } from './src/services/websocketManager';
@@ -51,12 +51,30 @@ function App(): React.JSX.Element {
     setStartAutoRace(!startAutoRace);
   };
 
+  function getDirection(x: number, y: number): string {// from desktop app
+    if (y === 0 && x > 0) return '⬆️';
+    if (y === 0 && x < 0) return '⬇️';
+    if (x === 0 && y > 0) return '➡️';
+    if (x === 0 && y < 0) return '⬅️';
+    if (x > 0 && y > 0) return '↗️';
+    if (x > 0 && y < 0) return '↖️';
+    if (x < 0 && y > 0) return '↙️';
+    if (x < 0 && y < 0) return '↘️';
+
+    return 'Car is stopped 🛑';
+  }
+
   return (
     <SafeAreaView style={styles.mainContainer}>
       <WebView
         source={{ uri: `http://192.168.70.50:7000` }}
         style={styles.videoStream}
       />
+      <View style={styles.directionArrows}>
+        <Text style={{ color: 'white' }}>
+          {getDirection(0, 0)}
+        </Text>
+      </View>
       <View style={styles.alignStartAutoRace}>
         {startAutoRace ? (
           <CustomButton
@@ -185,6 +203,11 @@ const styles = StyleSheet.create({
     right: 10,
   },
   alignStartAutoRace: {
+    position: 'absolute',
+    top: 10,
+    left: 10,
+  },
+  directionArrows: {
     position: 'absolute',
     top: 10,
     left: 10,

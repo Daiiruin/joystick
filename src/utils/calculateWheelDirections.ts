@@ -8,6 +8,12 @@ export function calculateWheelDirections(x: number, y: number, maxInput: number 
         throw new Error("Joystick/controller input values must be between -maxInput and maxInput");
     }
 
+    // Deadzone for y value
+    const deadzone = 25;
+    if (Math.abs(y) < deadzone && x !== 0) {
+        y = 0;
+    }
+
     // Scaling factors
     const maxSpeed = 4095;  // Maximum speed value for the wheels
     const minSpeed = -4095;  // Minimum speed to apply to the inner wheels to prevent them from being 0
@@ -79,7 +85,4 @@ export function calculateWheelDirections(x: number, y: number, maxInput: number 
     backRight = Math.round(backRight);
 
     return [frontLeft, backLeft, frontRight, backRight];
-
 }
-
-
